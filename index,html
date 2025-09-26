@@ -1,0 +1,34 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Barcode Scanner</title>
+  <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
+</head>
+<body>
+  <h3>Barcode Scanner → Google Sheets</h3>
+  <video id="preview" width="320" height="240" autoplay></video>
+  <div id="status">รอการสแกน...</div>
+
+  <script>
+    const webAppUrl = "https://script.google.com/macros/s/AKfycbw1-61CXRDOzkOgV6YDBoTddfLV1wVdK6A9N_mclwluYGLvTQovoWWPl7XprCquEkJMCQ/exec"; // ใส่ URL จากข้อ 1
+
+    const codeReader = new ZXing.BrowserMultiFormatReader();
+    codeReader.listVideoInputDevices().then(devices => {
+      const id = devices[devices.length - 1].deviceId; // ใช้กล้องหลัง
+      codeReader.decodeFromVideoDevice(id, 'preview', (result, err) => {
+        if (result) {
+          const text = result.text;
+          document.getElementById('status').textContent = "Scanned: " + text;
+          fetch(webAppUrl, {
+            method: "POST",
+            body: JSON.stringify({ code: text })
+          }).then(() => {
+            console.log("Sent:", text);
+          });
+        }
+      });
+    });
+  </script>
+</body>
+</html>
